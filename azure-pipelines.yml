@@ -23,7 +23,7 @@ jobs:
         netVersion: $(net-8-maui)
         appVersion: $(version)
         appVersionBuild: $(appVersionBuild)
-        keyStoreFileName: testkeystore.jks
+        keyStoreFileName: testkeystore
         keyStorePass: testkeystore
         keyStoreAlias: testkeystore
         keyStoreAliasPass: testkeystore
