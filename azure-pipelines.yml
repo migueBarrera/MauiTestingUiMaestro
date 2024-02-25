@@ -20,7 +20,7 @@ jobs:
     - template: Templates/build_release_android.yaml
       parameters:
         csproj: $(csproj)
-        netVersion: $(net-8-maui)
+        netVersion: 8.0.201
         appVersion: $(version)
         appVersionBuild: $(appVersionBuild)
         keyStoreFileName: testkeystore
