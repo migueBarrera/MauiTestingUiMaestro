@@ -28,11 +28,6 @@ jobs:
     #     keyStoreAlias: testkeystore
     #     keyStoreAliasPass: testkeystore
 
-    - script: |
-        echo "Configurando Java 8..."
-        export JAVA_HOME=$JAVA_HOME_8_X64
-        export PATH=$JAVA_HOME/bin:$PATH
-        java -version
 
     - script: |
         # Install AVD files
