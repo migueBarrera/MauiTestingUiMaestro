@@ -11,7 +11,7 @@ variables:
   - name: version
     value: $[format('{0:yyyy}.{0:MM}.{0:dd}.{0:HH}', pipeline.startTime)]
 pool:
-  vmImage: macos-12
+  vmImage: macos-13
 
 jobs:
   - job:
