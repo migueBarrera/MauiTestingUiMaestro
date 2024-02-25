@@ -23,7 +23,7 @@ jobs:
         netVersion: 8.0.201
         appVersion: $(version)
         appVersionBuild: $(appVersionBuild)
-        keyStoreFileName: testkeystore
+        keyStoreFileName: testkeystore.jks
         keyStorePass: testkeystore
         keyStoreAlias: testkeystore
         keyStoreAliasPass: testkeystore
