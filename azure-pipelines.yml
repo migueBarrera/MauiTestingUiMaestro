@@ -55,14 +55,15 @@ jobs:
         fi
         echo "Emulator settings ($emulator_config)"
         cat "$emulator_config"
-        splayName: Create Android emulator
-        ript: |
+      displayName: Create Android emulator
+      
+    - script: |
         echo "Starting emulator and waiting for boot to complete..."
         nohup $ANDROID_HOME/emulator/emulator -avd Pixel_API_29_AOSP -no-snapshot -no-window -no-audio -no-boot-anim -camera-back none -camera-front none -qemu -m 2048 > /dev/null 2>&1 &
         $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo "Emulator has finished booting"
         $ANDROID_HOME/platform-tools/adb devices
-        displayName: Start Android emulator
+      displayName: Start Android emulator
 
     - bash: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
