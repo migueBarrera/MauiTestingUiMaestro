@@ -4,7 +4,6 @@ trigger:
     - master
 
 variables:
-  - group: SecretAligner.Telemedicine.Mobile
   - name: csproj
     value: 'MauiTestingUiMaestro/MauiTestingUiMaestro.csproj'
   - name: appVersionBuild
@@ -24,7 +23,7 @@ jobs:
         netVersion: $(net-8-maui)
         appVersion: $(version)
         appVersionBuild: $(appVersionBuild)
-        keyStoreFileName: $(android-keystore-file-name)
-        keyStorePass: $(android-key-store-pass)
-        keyStoreAlias: $(android-key-store-alias)
-        keyStoreAliasPass: $(android-key-store-alias-pass)
+        keyStoreFileName: testkeystore.jks
+        keyStorePass: testkeystore
+        keyStoreAlias: testkeystore
+        keyStoreAliasPass: testkeystore
