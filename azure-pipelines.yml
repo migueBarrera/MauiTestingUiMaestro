@@ -1,19 +1,30 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- master
+  branches:
+    include:
+    - master
 
+variables:
+  - group: SecretAligner.Telemedicine.Mobile
+  - name: csproj
+    value: 'MauiTestingUiMaestro/MauiTestingUiMaestro.csproj'
+  - name: appVersionBuild
+    value: 1
+  - name: version
+    value: $[format('{0:yyyy}.{0:MM}.{0:dd}.{0:HH}', pipeline.startTime)]
 pool:
-  vmImage: ubuntu-latest
+  vmImage: macos-13
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+jobs:
+  - job:
+    displayName: Generate Android Bundle/Apk
+    steps:
+    - template: Templates/build_release_android.yaml
+      parameters:
+        csproj: $(csproj)
+        netVersion: $(net-8-maui)
+        appVersion: $(version)
+        appVersionBuild: $(appVersionBuild)
+        keyStoreFileName: $(android-keystore-file-name)
+        keyStorePass: $(android-key-store-pass)
+        keyStoreAlias: $(android-key-store-alias)
+        keyStoreAliasPass: $(android-key-store-alias-pass)

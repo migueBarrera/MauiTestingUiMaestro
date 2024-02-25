@@ -1,0 +1,24 @@
+parameters:
+- name: netVersion
+  default: ''
+- name: includePreviewVersions
+  default: false
+- name: timeoutInMinutes
+  default: 10  
+
+steps:
+ - script: |
+     sudo xcode-select -s /Applications/Xcode_15.2.app
+   displayName: Selects a specific version of Xcode 15.2
+
+ - task: UseDotNet@2
+   inputs:
+      packageType: 'sdk'
+      version: ${{ parameters.netVersion }}
+      includePreviewVersions: ${{ parameters.includePreviewVersions }}  
+
+ - task: CmdLine@2
+   displayName: "Install maui workloads"
+   timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+   inputs:
+    script: 'dotnet workload install maui-android maui-ios'

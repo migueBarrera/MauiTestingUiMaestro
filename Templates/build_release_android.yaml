@@ -1,0 +1,57 @@
+parameters:
+- name: csproj
+- name: netVersion
+  default: ''
+- name: appVersion
+  default: ''
+- name: appVersionBuild
+  default: ''  
+- name: keystoreFileName
+  default: ''  
+- name: keyStorePass
+  default: ''      
+- name: keyStoreAlias
+  default: ''  
+- name: keyStoreAliasPass
+  default: '' 
+  
+steps:
+- task: DownloadSecureFile@1
+  displayName: 'Download keystore'
+  name: keystore
+  inputs:
+   secureFile: ${{ parameters.keystoreFileName }}
+
+- template: prepare_environment_maui.yaml
+  parameters:
+     netVersion: ${{ parameters.netVersion }}
+     includePreviewVersions: false
+     timeoutInMinutes: 10
+
+- task: DotNetCoreCLI@2
+  displayName: "Build android"
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: ${{ parameters.csproj }}
+    arguments: '-c Release -f net8.0-android 
+            /p:AndroidKeyStore=true 
+            /p:ApplicationDisplayVersion=${{ parameters.appVersion }} 
+            /p:ApplicationVersion=${{ parameters.appVersionBuild }} 
+            /p:AndroidSigningKeyStore=$(keystore.secureFilePath) 
+            /p:AndroidSigningStorePass=${{ parameters.keyStorePass }} 
+            /p:AndroidSigningKeyAlias=${{ parameters.keyStoreAlias }} 
+            /p:AndroidSigningKeyPass=${{ parameters.keyStoreAliasPass }}'
+
+- task: CopyFiles@2
+  inputs:
+   SourceFolder: '$(agent.builddirectory)'
+   Contents: '**/?(*Signed.aab|*Signed.apk)'
+   TargetFolder: '$(build.artifactstagingdirectory)'
+   flattenFolders: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+   PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+   ArtifactName: 'Android Artifacts'
+   publishLocation: 'Container'
