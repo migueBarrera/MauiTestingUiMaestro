@@ -30,7 +30,7 @@ jobs:
 
     - script: |
         # Install AVD files
-        yes | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;andoroid-34;default;x86_64'
+        yes | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-34;default;x86_64'
         yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
         # Create emulator
         echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n Pixel_API_34_AOSP -d pixel --package 'system-images;android-34;default;x86_64' --force
