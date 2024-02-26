@@ -4,4 +4,4 @@ appId: com.companyname.mauitestinguimaestro
 ---
 - launchApp
 - tapOn: "Click me"
-- takeScreenshot: MainScreen
+- takeScreenshot: Captures/MainScreen
