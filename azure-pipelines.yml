@@ -69,7 +69,7 @@ jobs:
         curl -Ls "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH":"$HOME/.maestro/bin"
         adb install com.companyname.mauitestinguimaestro-Signed.apk
-        maestro record flow.yaml
+        maestro test --format junit flow.yaml
       displayName: 'Bash Script'
       
     - task: CopyFiles@2
