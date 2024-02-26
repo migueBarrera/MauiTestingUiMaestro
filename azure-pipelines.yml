@@ -11,7 +11,7 @@ variables:
   - name: version
     value: $[format('{0:yyyy}.{0:MM}.{0:dd}.{0:HH}', pipeline.startTime)]
 pool:
-  vmImage: macos-12
+  vmImage: macOS-latest
 
 jobs:
   - job:
@@ -30,7 +30,7 @@ jobs:
 
     - script: |
         # Install AVD files
-        yes | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;34;default;x86_64'
+        yes | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;andoroid-34;default;x86_64'
         yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
         # Create emulator
         echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n Pixel_API_34_AOSP -d pixel --package 'system-images;android-34;default;x86_64' --force
@@ -70,23 +70,8 @@ jobs:
         export PATH="$PATH":"$HOME/.maestro/bin"
         adb install com.companyname.mauitestinguimaestro-Signed.apk
         maestro test --format junit flow.yaml
-      displayName: 'Bash Script'
+      displayName: 'Execute UI test'
       
-    - task: CopyFiles@2
-      displayName: Copy ipa to artifacts
-      inputs:
-        SourceFolder: '$(agent.builddirectory)'
-        Contents: '**'
-        TargetFolder: '$(build.artifactstagingdirectory)'
-        flattenFolders: true
-
-    - task: PublishBuildArtifacts@1
-      displayName: Publish artifacts
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'test Artifacts'
-        publishLocation: 'Container'
-
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
