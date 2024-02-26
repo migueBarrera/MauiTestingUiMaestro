@@ -30,12 +30,12 @@ jobs:
 
     - script: |
         # Install AVD files
-        yes | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-33;default;x86_64'
+        yes | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;34;default;x86_64'
         yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
         # Create emulator
-        echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n Pixel_API_33_AOSP -d pixel --package 'system-images;android-33;default;x86_64' --force
+        echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n Pixel_API_34_AOSP -d pixel --package 'system-images;android-34;default;x86_64' --force
         $ANDROID_HOME/emulator/emulator -list-avds
-        emulator_config=~/.android/avd/Pixel_API_33_AOSP.avd/config.ini
+        emulator_config=~/.android/avd/Pixel_API_34_AOSP.avd/config.ini
         # The following madness is to support empty OR populated config.ini files,
         # the state of which is dependant on the version of the emulator used (which we don't control),
         # so let's be defensive to be safe.
@@ -59,7 +59,7 @@ jobs:
       
     - script: |
         echo "Starting emulator and waiting for boot to complete..."
-        nohup $ANDROID_HOME/emulator/emulator -avd Pixel_API_33_AOSP -no-snapshot -no-window -no-audio -no-boot-anim -camera-back none -camera-front none -qemu -m 2048 > /dev/null 2>&1 &
+        nohup $ANDROID_HOME/emulator/emulator -avd Pixel_API_34_AOSP -no-snapshot -no-window -no-audio -no-boot-anim -camera-back none -camera-front none -qemu -m 2048 > /dev/null 2>&1 &
         $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
         echo "Emulator has finished booting"
         $ANDROID_HOME/platform-tools/adb devices
