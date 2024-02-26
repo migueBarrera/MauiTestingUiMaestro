@@ -17,17 +17,16 @@ jobs:
   - job:
     displayName: Generate Android Bundle/Apk
     steps:
-    # - template: Templates/build_release_android.yaml
-    #   parameters:
-    #     csproj: $(csproj)
-    #     netVersion: 8.0.201
-    #     appVersion: $(version)
-    #     appVersionBuild: $(appVersionBuild)
-    #     keyStoreFileName: testkeystore.jks
-    #     keyStorePass: testkeystore
-    #     keyStoreAlias: testkeystore
-    #     keyStoreAliasPass: testkeystore
-
+    - template: Templates/build_release_android.yaml
+      parameters:
+        csproj: $(csproj)
+        netVersion: 8.0.201
+        appVersion: $(version)
+        appVersionBuild: $(appVersionBuild)
+        keyStoreFileName: testkeystore.jks
+        keyStorePass: testkeystore
+        keyStoreAlias: testkeystore
+        keyStoreAliasPass: testkeystore
 
     - script: |
         # Install AVD files
@@ -69,5 +68,6 @@ jobs:
     - bash: |
         curl -Ls "https://get.maestro.mobile.dev" | bash
         export PATH="$PATH":"$HOME/.maestro/bin"
+        adb install com.companyname.mauitestinguimaestro-Signed.apk
         maestro test flow.yaml
       displayName: 'Bash Script'
