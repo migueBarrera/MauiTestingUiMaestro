@@ -1,0 +1,6 @@
+# flow.yaml
+
+appId: com.companyname.mauitestinguimaestro
+
+- launchApp
+- tapOn: "Click me"

@@ -7,10 +7,6 @@ parameters:
   default: 10  
 
 steps:
- - script: |
-     sudo xcode-select -s /Applications/Xcode_15.2.app
-   displayName: Selects a specific version of Xcode 15.2
-
  - task: UseDotNet@2
    inputs:
       packageType: 'sdk'
