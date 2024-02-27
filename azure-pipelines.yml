@@ -34,7 +34,7 @@ jobs:
         targetType: 'inline'
         script: |
           $originalPath = "$(agent.builddirectory)\**\*Signed.apk"
-          $version = "${{ parameters.appVersion }}-${{ parameters.appVersionBuild }}"
+          $version = "${{ parameters.version }}-${{ parameters.appVersionBuild }}"
           $newFileName = "com.secretaligner.predention-$version.apk"
           Get-ChildItem $originalPath | Rename-Item -NewName $newFileName
           Write-Host "APK renamed to $newFileName"
@@ -45,7 +45,7 @@ jobs:
         targetType: 'inline'
         script: |
           $originalPath = "$(agent.builddirectory)\**\*Signed.aab"
-          $version = "${{ parameters.appVersion }}-${{ parameters.appVersionBuild }}"
+          $version = "${{ parameters.version }}-${{ parameters.appVersionBuild }}"
           $newFileName = "com.secretaligner.predention-$version.aab"
           Get-ChildItem $originalPath | Rename-Item -NewName $newFileName
           Write-Host "Bundle renamed to $newFileName"
