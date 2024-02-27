@@ -17,62 +17,99 @@ jobs:
   - job:
     displayName: Generate Android Bundle/Apk
     steps:
-    # - template: Templates/build_release_android.yaml
-    #   parameters:
-    #     csproj: $(csproj)
-    #     netVersion: 8.0.201
-    #     appVersion: $(version)
-    #     appVersionBuild: $(appVersionBuild)
-    #     keyStoreFileName: testkeystore.jks
-    #     keyStorePass: testkeystore
-    #     keyStoreAlias: testkeystore
-    #     keyStoreAliasPass: testkeystore
+    - template: Templates/build_release_android.yaml
+      parameters:
+        csproj: $(csproj)
+        netVersion: 8.0.201
+        appVersion: $(version)
+        appVersionBuild: $(appVersionBuild)
+        keyStoreFileName: testkeystore.jks
+        keyStorePass: testkeystore
+        keyStoreAlias: testkeystore
+        keyStoreAliasPass: testkeystore
 
-    - script: |
-        # Install AVD files
-        yes | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-34;default;x86_64'
-        yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
-        # Create emulator
-        echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n Pixel_API_34_AOSP -d pixel --package 'system-images;android-34;default;x86_64' --force
-        $ANDROID_HOME/emulator/emulator -list-avds
-        emulator_config=~/.android/avd/Pixel_API_34_AOSP.avd/config.ini
-        # The following madness is to support empty OR populated config.ini files,
-        # the state of which is dependant on the version of the emulator used (which we don't control),
-        # so let's be defensive to be safe.
-        # Replace existing config (NOTE we're on MacOS so sed works differently!)
-        sed -i .bak 's/hw.lcd.density=.*/hw.lcd.density=420/' "$emulator_config"
-        sed -i .bak 's/hw.lcd.height=.*/hw.lcd.height=1920/' "$emulator_config"
-        sed -i .bak 's/hw.lcd.width=.*/hw.lcd.width=1080/' "$emulator_config"
-        # Or, add new config
-        if ! grep -q "hw.lcd.density" "$emulator_config"; then
-          echo "hw.lcd.density=420" >> "$emulator_config"
-        fi
-        if ! grep -q "hw.lcd.height" "$emulator_config"; then
-          echo "hw.lcd.height=1920" >> "$emulator_config"
-        fi
-        if ! grep -q "hw.lcd.width" "$emulator_config"; then
-          echo "hw.lcd.width=1080" >> "$emulator_config"
-        fi
-        echo "Emulator settings ($emulator_config)"
-        cat "$emulator_config"
-      displayName: Create Android emulator
-      
-    - script: |
-        echo "Starting emulator and waiting for boot to complete..."
-        nohup $ANDROID_HOME/emulator/emulator -avd Pixel_API_34_AOSP -no-snapshot -no-window -no-audio -no-boot-anim -camera-back none -camera-front none -qemu -m 2048 > /dev/null 2>&1 &
-        $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-        echo "Emulator has finished booting"
-        $ANDROID_HOME/platform-tools/adb devices
-      displayName: Start Android emulator
-
-    - bash: |
-        curl -Ls "https://get.maestro.mobile.dev" | bash
-        export PATH="$PATH":"$HOME/.maestro/bin"
-        adb install com.companyname.mauitestinguimaestro-Signed.apk
-        maestro test --format junit flow.yaml
-      displayName: 'Execute UI test'
-      
-    - task: PublishTestResults@2
+    - task: PowerShell@2
+      displayName: 'Rename APK'
       inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: '**/report.xml'
+        targetType: 'inline'
+        script: |
+          $originalPath = "$(agent.builddirectory)\**\*Signed.apk"
+          $version = "${{ parameters.appVersion }}-${{ parameters.appVersionBuild }}"
+          $newFileName = "com.secretaligner.predention-$version.apk"
+          Get-ChildItem $originalPath | Rename-Item -NewName $newFileName
+          Write-Host "APK renamed to $newFileName"
+
+    - task: PowerShell@2
+      displayName: 'Rename Bundle'
+      inputs:
+        targetType: 'inline'
+        script: |
+          $originalPath = "$(agent.builddirectory)\**\*Signed.aab"
+          $version = "${{ parameters.appVersion }}-${{ parameters.appVersionBuild }}"
+          $newFileName = "com.secretaligner.predention-$version.aab"
+          Get-ChildItem $originalPath | Rename-Item -NewName $newFileName
+          Write-Host "Bundle renamed to $newFileName"
+
+    - task: CopyFiles@2
+      displayName: Copy bundle and apk to artifacts
+      inputs:
+        SourceFolder: '$(agent.builddirectory)'
+        Contents: '**/com.secretaligner.predention-*.?(aab|apk)'
+        TargetFolder: '$(build.artifactstagingdirectory)'
+        flattenFolders: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish artifacts
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'Android Artifacts'
+        publishLocation: 'Container'
+
+    # - script: |
+    #     # Install AVD files
+    #     yes | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-34;default;x86_64'
+    #     yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+    #     # Create emulator
+    #     echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n Pixel_API_34_AOSP -d pixel --package 'system-images;android-34;default;x86_64' --force
+    #     $ANDROID_HOME/emulator/emulator -list-avds
+    #     emulator_config=~/.android/avd/Pixel_API_34_AOSP.avd/config.ini
+    #     # The following madness is to support empty OR populated config.ini files,
+    #     # the state of which is dependant on the version of the emulator used (which we don't control),
+    #     # so let's be defensive to be safe.
+    #     # Replace existing config (NOTE we're on MacOS so sed works differently!)
+    #     sed -i .bak 's/hw.lcd.density=.*/hw.lcd.density=420/' "$emulator_config"
+    #     sed -i .bak 's/hw.lcd.height=.*/hw.lcd.height=1920/' "$emulator_config"
+    #     sed -i .bak 's/hw.lcd.width=.*/hw.lcd.width=1080/' "$emulator_config"
+    #     # Or, add new config
+    #     if ! grep -q "hw.lcd.density" "$emulator_config"; then
+    #       echo "hw.lcd.density=420" >> "$emulator_config"
+    #     fi
+    #     if ! grep -q "hw.lcd.height" "$emulator_config"; then
+    #       echo "hw.lcd.height=1920" >> "$emulator_config"
+    #     fi
+    #     if ! grep -q "hw.lcd.width" "$emulator_config"; then
+    #       echo "hw.lcd.width=1080" >> "$emulator_config"
+    #     fi
+    #     echo "Emulator settings ($emulator_config)"
+    #     cat "$emulator_config"
+    #   displayName: Create Android emulator
+      
+    # - script: |
+    #     echo "Starting emulator and waiting for boot to complete..."
+    #     nohup $ANDROID_HOME/emulator/emulator -avd Pixel_API_34_AOSP -no-snapshot -no-window -no-audio -no-boot-anim -camera-back none -camera-front none -qemu -m 2048 > /dev/null 2>&1 &
+    #     $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+    #     echo "Emulator has finished booting"
+    #     $ANDROID_HOME/platform-tools/adb devices
+    #   displayName: Start Android emulator
+
+    # - bash: |
+    #     curl -Ls "https://get.maestro.mobile.dev" | bash
+    #     export PATH="$PATH":"$HOME/.maestro/bin"
+    #     adb install com.companyname.mauitestinguimaestro-Signed.apk
+    #     maestro test --format junit flow.yaml
+    #   displayName: 'Execute UI test'
+      
+    # - task: PublishTestResults@2
+    #   inputs:
+    #     testResultsFormat: 'JUnit'
+    #     testResultsFiles: '**/report.xml'
